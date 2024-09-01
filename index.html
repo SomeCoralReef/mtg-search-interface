@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MTG Card Search</title>
+</head>
+<body>
+    <h1>Magic: The Gathering Card Search</h1>
+    <input type="text" id="card-input" placeholder="Search for a card..." autocomplete="off">
+    <ul id="suggestions"></ul>
+
+    <!-- JavaScript code goes here -->
+    <script>
+        const cardInput = document.getElementById('card-input');
+        const suggestions = document.getElementById('suggestions');
+
+        // Event listener for input changes
+        cardInput.addEventListener('input', async () => {
+            const query = cardInput.value;
+            if (query.length > 0) {
+                // Fetch suggestions from the server
+                const response = await fetch(`/search?query=${query}`);
+                const data = await response.json();
+                suggestions.innerHTML = ''; // Clear previous suggestions
+
+                data.forEach(cardName => {
+                    const li = document.createElement('li');
+                    li.textContent = cardName;
+                    li.onclick = () => {
+                        cardInput.value = cardName; // Fill input with selected card name
+                        suggestions.innerHTML = ''; // Clear suggestions
+
+                        // Send selected card name to the backend
+                        fetch('/update_notion', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                card_name: cardName
+                            })
+                        })
+                        .then(response => response.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                alert(`Card '${cardName}' added to Notion!`);
+                            } else {
+                                alert('Failed to add card to Notion.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            alert('An error occurred while adding the card to Notion.');
+                        });
+                    };
+                    suggestions.appendChild(li);
+                });
+            } else {
+                suggestions.innerHTML = ''; // Clear suggestions if input is empty
+            }
+        });
+
+        // Event listener for pressing Enter key
+        cardInput.addEventListener('keydown', (event) => {
+            if (event.key === 'Enter') {
+                const firstSuggestion = suggestions.querySelector('li');
+                if (firstSuggestion) {
+                    cardInput.value = firstSuggestion.textContent; // Use first suggestion
+                    suggestions.innerHTML = ''; // Clear suggestions
+
+                    // Send the selected card name to the backend
+                    fetch('/update_notion', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            card_name: firstSuggestion.textContent
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            alert(`Card '${firstSuggestion.textContent}' added to Notion!`);
+                        } else {
+                            alert('Failed to add card to Notion.');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while adding the card to Notion.');
+                    });
+                }
+            }
+        });
+    </script>
+</body>
+</html>
