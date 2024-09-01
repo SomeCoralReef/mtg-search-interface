@@ -1,8 +1,10 @@
 import requests
 from notion_client import Client
 from flask import Flask, request, jsonify, send_from_directory
+import os
 
-app = Flask(__name__, static_folder='docs', static_url_path='')
+# Use the current directory as the static folder
+app = Flask(__name__, static_folder='.', static_url_path='')
 
 NOTION_INTEGRATION_TOKEN = "secret_7AoABIpcxMWqy3dr0HhrFQr959oEV7uSDlgmsSyUwXy"
 NOTION_DATABASE_ID = "540389a82116480c93d20560a329e995"
@@ -11,7 +13,7 @@ notion = Client(auth=NOTION_INTEGRATION_TOKEN)
 
 @app.route('/')
 def serve_index():
-    return app.send_static_file('index.html')
+    return send_from_directory('.', 'index.html')  # Serve index.html from the current directory
 
 @app.route('/search', methods=['GET'])
 def search_card():
