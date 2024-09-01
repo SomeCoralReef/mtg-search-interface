@@ -2,7 +2,7 @@ import requests
 from notion_client import Client
 from flask import Flask, request, jsonify, send_from_directory
 
-app = Flask(__name__, static_folder='static', static_url_path='')
+app = Flask(__name__, static_folder='docs', static_url_path='')
 
 NOTION_INTEGRATION_TOKEN = "secret_7AoABIpcxMWqy3dr0HhrFQr959oEV7uSDlgmsSyUwXy"
 NOTION_DATABASE_ID = "540389a82116480c93d20560a329e995"
